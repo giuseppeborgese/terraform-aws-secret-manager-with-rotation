@@ -8,12 +8,6 @@ This module will create all the resources to store and rotate a MySQL or Aurora 
 * A VPC with private subnets and accessibilty to AWS Secrets Manager Endpoint, see below for more details.
 * An RDS with MySQL or Aurora already created and reacheable from the private subnets
 
-module "secret-manager-with-rotation" {
-  source  = "giuseppeborgese/secret-manager-with-rotation/aws"
-  version = "0.1.0"
-
-  # insert the 7 required variables here
-}
 
 # Usage Example
 ``` hcl
@@ -45,4 +39,4 @@ You can use a NAT GW or configure your Routes with a VPC Endpoint like is descri
 * Interesting to [force the rotation](https://forums.aws.amazon.com/thread.jspa?threadID=280093&tstart=0)
 
 # If you like it
-Plese if you like this module, thumbs up on the youtube video and leave a comment as well for any questions.
+Please if you like this module, thumbs up on the youtube video and leave a comment as well for any questions.
