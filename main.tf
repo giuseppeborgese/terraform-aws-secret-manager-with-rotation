@@ -84,7 +84,7 @@ resource "aws_security_group" "lambda" {
 
 variable "filename" { default = "rotate-code-mysql"}
 resource "aws_lambda_function" "rotate-code-mysql" {
-  filename           = "${var.filename}.zip"
+  filename           = "${path.module}/${var.filename}.zip"
   function_name      = "${var.name}-${var.filename}"
   role               = "${aws_iam_role.lambda_rotation.arn}"
   handler            = "lambda_function.lambda_handler"
