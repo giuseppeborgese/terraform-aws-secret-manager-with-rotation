@@ -33,6 +33,8 @@ module "secret-manager-with-rotation" {
 
 ### Video Tutorial
 Take a look to the video to see the module in action
+
+
 [![Rotate automatically a MySQL or Aurora password using AWS Secrets Manager and Terraform](https://img.youtube.com/vi/ljZ6BZJabUk/0.jpg)](https://youtu.be/ljZ6BZJabUk)
 
 
