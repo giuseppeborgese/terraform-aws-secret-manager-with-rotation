@@ -33,7 +33,7 @@ module "secret-manager-with-rotation" {
 
 ### Video Tutorial
 Take a look to the video to see the module in action
-[![Rotate automatically a MySQL or Aurora password using AWS Secrets Manager and Terraform](https://img.youtube.com/vi/cNtZWdxqhRc/0.jpg)](https://youtu.be/cNtZWdxqhRc)
+[![Rotate automatically a MySQL or Aurora password using AWS Secrets Manager and Terraform](https://img.youtube.com/vi/ljZ6BZJabUk/0.jpg)](https://youtu.be/ljZ6BZJabUk)
 
 
 The subnets specified needs to be private and with internet access to reach the [AWS secrets manager endpoint](https://docs.aws.amazon.com/general/latest/gr/rande.html#asm_region)
