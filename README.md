@@ -1,5 +1,7 @@
 This module will create all the resources to store and rotate a MySQL or Aurora password using the AWS Secrets Manager service.
 
+# Schema
+
 ![schema](schema.jpg)
 
 # Prerequisites
@@ -7,7 +9,7 @@ This module will create all the resources to store and rotate a MySQL or Aurora 
 * An RDS with MySQL or Aurora already created and reacheable from the private subnets
 
 # Usage Example
-```
+```terraform
 module "mysqlsecretmanager" {
   source                     = "terraform-aws-secret-manager-with-rotation"
   name                       = "PassRotation"
@@ -19,7 +21,6 @@ module "mysqlsecretmanager" {
   mysql_password             = "dummy_password_will_we_rotated"
   mysql_dbInstanceIdentifier = "my_rds_db_identifier"
 }
-
 ```
 
 Take a look to the video to see the module in action
