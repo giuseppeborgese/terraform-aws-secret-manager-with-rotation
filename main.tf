@@ -88,7 +88,7 @@ resource "aws_lambda_function" "rotate-code-mysql" {
   function_name      = "${var.name}-${var.filename}"
   role               = "${aws_iam_role.lambda_rotation.arn}"
   handler            = "lambda_function.lambda_handler"
-  source_code_hash   = "${base64sha256(file("${var.filename}.zip"))}"
+  source_code_hash   = "${base64sha256(file("${path.module}/${var.filename}.zip"))}"
   runtime            = "python2.7"
   vpc_config {
     subnet_ids         = "${var.subnets_lambda}"
