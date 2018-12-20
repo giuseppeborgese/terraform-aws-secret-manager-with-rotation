@@ -9,7 +9,7 @@ This module will create all the resources to store and rotate a MySQL or Aurora 
 * An RDS with MySQL or Aurora already created and reacheable from the private subnets
 
 # Usage Example
-```terraform
+``` hcl
 module "mysqlsecretmanager" {
   source                     = "terraform-aws-secret-manager-with-rotation"
   name                       = "PassRotation"
