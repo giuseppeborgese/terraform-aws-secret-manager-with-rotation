@@ -2,7 +2,7 @@ This module will create all the resources to store and rotate a MySQL or Aurora 
 
 # Schema
 
-![schema](schema.jpg)
+![schema](https://raw.githubusercontent.com/giuseppeborgese/terraform-aws-secret-manager-with-rotation/master/schema.jpg)
 
 # Prerequisites
 * A VPC with private subnets and accessibilty to AWS Secrets Manager Endpoint, see below for more details.
