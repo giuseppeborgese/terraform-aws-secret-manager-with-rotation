@@ -71,7 +71,7 @@ resource "aws_iam_policy_attachment" "SecretsManagerRDSMySQLRotationSingleUserRo
 resource "aws_security_group" "lambda" {
     vpc_id = "${data.aws_subnet.firstsub.vpc_id}"
     name = "${var.name}-Lambda-SecretManager"
-    tags {
+    tags = {
         Name  = "${var.name}-Lambda-SecretManager"
     }
     egress {
