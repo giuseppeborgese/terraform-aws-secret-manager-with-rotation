@@ -22,6 +22,7 @@ module "secret-manager-with-rotation" {
   mysql_host                 =  "mysqlEndpointurl.xxxxxx.us-east-1.rds.amazonaws.com"
   mysql_password             = "dummy_password_will_we_rotated"
   mysql_dbInstanceIdentifier = "my_rds_db_identifier"
+  rds_security_group_id      = "<security group id assigned to the database, which allows ingress from self>"
 }
 ```
 
@@ -40,3 +41,19 @@ You can use a NAT GW or configure your Routes with a VPC Endpoint like is descri
 
 # If you like it
 Please if you like this module, thumbs up on the youtube video and leave a comment as well for any questions.
+
+
+## Embedded python code:
+The embedded lambda function comes from AWS' auto-created versions for python 3.7.
+It has bugfixes to handle Secrets Manager API calls being inconsistent/having degraded performance.
+https://github.com/aws-samples/aws-secrets-manager-rotation-lambdas/blob/master/SecretsManagerRDSMySQLRotationSingleUser/lambda_function.py
+
+Editing the embedded code:
+- unzip the current zip
+- make changes
+- repack the bash commands below
+```bash
+cd rotate-code-mysql
+rm ../rotate-code-mysql.zip
+zip -r -X ../rotate-code-mysql.zip .
+```
