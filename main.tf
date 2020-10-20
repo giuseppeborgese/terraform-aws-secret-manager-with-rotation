@@ -173,21 +173,8 @@ resource "aws_secretsmanager_secret_version" "default" {
 }
 
 module "slash" {
-  source = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.19.2"
-
-  enabled             = var.enabled
-  namespace           = var.namespace
-  environment         = "rds"
-  stage               = var.stage
-  name                = var.name
-  delimiter           = "/"
-  attributes          = var.attributes
-  tags                = var.tags
-  additional_tag_map  = var.additional_tag_map
-  label_order         = ["stage", "name", "environment", "namespace", "attributes"]
-  regex_replace_chars = var.regex_replace_chars
-  id_length_limit     = var.id_length_limit
-
-  context = var.context
+  source    = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.19.2"
+  delimiter = "/"
+  context   = module.this.context
 }
 
