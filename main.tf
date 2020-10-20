@@ -1,263 +1,193 @@
-data "aws_partition" "current" {}
-data "aws_region" "current" {}
-data "aws_caller_identity" "current" {}
-data "aws_subnet" "firstsub" {  id = "${var.subnets_lambda[0]}" }
+locals {
+  filename           = var.rotation_type == "single" ? "SecretsManagerRDSMySQLRotationSingleUser.zip" : "SecretsManagerRDSMySQLRotationMultiUser.zip"
+  lambda_description = var.rotation_type == "single" ? "Conducts an AWS SecretsManager secret rotation for RDS MySQL using single user rotation scheme" : "Conducts an AWS SecretsManager secret rotation for RDS MySQL using multi user rotation scheme"
 
-resource "aws_iam_role" "lambda_rotation" {
-  name = "${var.name}-rotation_lambda"
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
+  secret_string_single = {
+    username             = var.mysql_username
+    password             = var.mysql_password
+    engine               = "mysql"
+    host                 = var.mysql_host
+    port                 = var.mysql_port
+    dbname               = var.mysql_dbname
+  }
+  secret_string_multi  = {
+    username             = var.mysql_username
+    password             = var.mysql_password
+    engine               = "mysql"
+    host                 = var.mysql_host
+    port                 = var.mysql_port
+    dbname               = var.mysql_dbname
+    masterarn            = var.secretsmanager_masterarn
+  }
 }
 
-resource "aws_iam_policy_attachment" "lambdabasic" {
-  name       = "${var.name}-lambdabasic"
-  roles      = ["${aws_iam_role.lambda_rotation.name}"]
+resource "aws_iam_role" "default" {
+  name               = "${module.this.id}-password_rotation"
+  assume_role_policy = data.aws_iam_policy_document.service.json
+  tags               = module.this.tags
+}
+
+resource "aws_iam_role_policy_attachment" "lambda-basic" {
+  role       = aws_iam_role.default.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-data "aws_iam_policy_document" "SecretsManagerRDSMySQLRotationSingleUserRolePolicy" {
-  statement {
-    actions = [
-      "ec2:CreateNetworkInterface",
-      "ec2:DeleteNetworkInterface",
-      "ec2:DescribeNetworkInterfaces",
-      "ec2:DetachNetworkInterface",
-    ]
-    resources = [ "*",]
-  }
-  statement {
-    actions = [
-      "secretsmanager:DescribeSecret",
-      "secretsmanager:GetSecretValue",
-      "secretsmanager:PutSecretValue",
-      "secretsmanager:UpdateSecretVersionStage",
-    ]
-    resources = [
-      "arn:${data.aws_partition.current.partition}:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:*",
-    ]
-  }
-  statement {
-    actions = ["secretsmanager:GetRandomPassword"]
-    resources = ["*",]
-  }
+resource "aws_iam_role_policy_attachment" "lambda-vpc" {
+  role       = aws_iam_role.default.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
-resource "aws_iam_policy" "SecretsManagerRDSMySQLRotationSingleUserRolePolicy" {
-  name   = "${var.name}-SecretsManagerRDSMySQLRotationSingleUserRolePolicy"
-  path   = "/"
-  policy = "${data.aws_iam_policy_document.SecretsManagerRDSMySQLRotationSingleUserRolePolicy.json}"
+resource "aws_iam_role_policy" "SecretsManagerRDSMySQLRotationSingleUserRolePolicy0" {
+  count  = var.rotation_type == "single" ? 1 : 0
+  name   = "SecretsManagerRDSMySQLRotationSingleUserRolePolicy0"
+  role   = aws_iam_role.default.name
+  policy = data.aws_iam_policy_document.SecretsManagerRDSMySQLRotationSingleUserRolePolicy0.json
 }
 
-
-resource "aws_iam_policy_attachment" "SecretsManagerRDSMySQLRotationSingleUserRolePolicy" {
-  name       = "${var.name}-SecretsManagerRDSMySQLRotationSingleUserRolePolicy"
-  roles      = ["${aws_iam_role.lambda_rotation.name}"]
-  policy_arn = "${aws_iam_policy.SecretsManagerRDSMySQLRotationSingleUserRolePolicy.arn}"
+resource "aws_iam_role_policy" "SecretsManagerRDSMySQLRotationSingleUserRolePolicy1" {
+  count  = var.rotation_type == "single" ? 1 : 0
+  name   = "SecretsManagerRDSMySQLRotationSingleUserRolePolicy1"
+  role   = aws_iam_role.default.name
+  policy = data.aws_iam_policy_document.SecretsManagerRDSMySQLRotationSingleUserRolePolicy1.json
 }
 
-resource "aws_security_group" "lambda" {
-    vpc_id = "${data.aws_subnet.firstsub.vpc_id}"
-    name = "${var.name}-Lambda-SecretManager"
-    tags = {
-        Name  = "${var.name}-Lambda-SecretManager"
-    }
-    egress {
-        from_port       = 0
-        to_port         = 0
-        protocol        = "-1"
-        cidr_blocks     = ["0.0.0.0/0"]
-  }
+resource "aws_iam_role_policy" "SecretsManagerRDSMySQLRotationSingleUserRolePolicy2" {
+  count  = var.rotation_type == "single" ? 1 : 0
+  name   = "SecretsManagerRDSMySQLRotationSingleUserRolePolicy2"
+  role   = aws_iam_role.default.name
+  policy = data.aws_iam_policy_document.SecretsManagerRDSMySQLRotationSingleUserRolePolicy2.json
 }
 
-variable "filename" { default = "rotate-code-mysql"}
-resource "aws_lambda_function" "rotate-code-mysql" {
-  filename           = "${path.module}/${var.filename}.zip"
-  function_name      = "${var.name}-${var.filename}"
-  role               = "${aws_iam_role.lambda_rotation.arn}"
-  handler            = "lambda_function.lambda_handler"
-  source_code_hash   = filebase64sha256("${path.module}/${var.filename}.zip")
-  runtime            = "python2.7"
+resource "aws_iam_role_policy" "SecretsManagerRDSMySQLRotationMultiUserRolePolicy0" {
+  count  = var.rotation_type == "single" ? 0 : 1
+  name   = "SecretsManagerRDSMySQLRotationMultiUserRolePolicy0"
+  role   = aws_iam_role.default.name
+  policy = data.aws_iam_policy_document.SecretsManagerRDSMySQLRotationMultiUserRolePolicy0.json
+}
+
+resource "aws_iam_role_policy" "SecretsManagerRDSMySQLRotationMultiUserRolePolicy1" {
+  count  = var.rotation_type == "single" ? 0 : 1
+  name   = "SecretsManagerRDSMySQLRotationMultiUserRolePolicy1"
+  role   = aws_iam_role.default.name
+  policy = data.aws_iam_policy_document.SecretsManagerRDSMySQLRotationMultiUserRolePolicy1.json
+}
+
+resource "aws_iam_role_policy" "SecretsManagerRDSMySQLRotationMultiUserRolePolicy2" {
+  count  = var.rotation_type == "single" ? 0 : 1
+  name   = "SecretsManagerRDSMySQLRotationMultiUserRolePolicy2"
+  role   = aws_iam_role.default.name
+  policy = data.aws_iam_policy_document.SecretsManagerRDSMySQLRotationMultiUserRolePolicy2.json
+}
+
+resource "aws_iam_role_policy" "SecretsManagerRDSMySQLRotationMultiUserRolePolicy4" {
+  count  = var.rotation_type == "single" ? 0 : 1
+  name   = "SecretsManagerRDSMySQLRotationMultiUserRolePolicy4"
+  role   = aws_iam_role.default.name
+  policy = data.aws_iam_policy_document.SecretsManagerRDSMySQLRotationMultiUserRolePolicy4.json
+}
+
+#resource "aws_security_group" "default" {
+#  vpc_id = data.aws_subnet.firstsub.vpc_id
+#  name   = "${module.this.id}-Lambda-SecretManager"
+#  tags = {
+#    Name = "${module.this.id}-Lambda-SecretManager"
+#  }
+#  egress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#}
+
+resource "aws_lambda_function" "default" {
+  description      = local.lambda_description
+  filename         = "${path.module}/functions/${local.filename}"
+  source_code_hash = filebase64sha256("${path.module}/functions/${local.filename}")
+  function_name    = "${module.this.id}-password_rotation"
+  handler          = "lambda_function.lambda_handler"
+  runtime          = "python3.7"
+  timeout          = 30
+  role             = aws_iam_role.default.arn
   vpc_config {
-    subnet_ids         = "${var.subnets_lambda}"
-    security_group_ids = ["${aws_security_group.lambda.id}"]
+    subnet_ids         = var.subnets_lambda
+    security_group_ids = var.security_group
   }
-  timeout            = 30
-  description        = "Conducts an AWS SecretsManager secret rotation for RDS MySQL using single user rotation scheme"
   environment {
     variables = { #https://docs.aws.amazon.com/general/latest/gr/rande.html#asm_region
       SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${data.aws_region.current.name}.amazonaws.com"
     }
   }
+  tags             = module.this.tags
 }
 
-resource "aws_lambda_permission" "allow_secret_manager_call_Lambda" {
-    function_name = "${aws_lambda_function.rotate-code-mysql.function_name}"
-    statement_id = "AllowExecutionSecretManager"
-    action = "lambda:InvokeFunction"
-    principal = "secretsmanager.amazonaws.com"
+resource "aws_lambda_permission" "default" {
+  function_name = aws_lambda_function.default.function_name
+  statement_id  = "AllowExecutionSecretManager"
+  action        = "lambda:InvokeFunction"
+  principal     = "secretsmanager.amazonaws.com"
 }
-/* not yet available
-data "aws_iam_policy_document" "kms" {
-  statement {
-    sid = "Enable IAM User Permissions"
-    actions = [ "*" ]
-    principals {
-      type = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
-    }
-    resources = ["kms:*"]
-  }
 
-  statement {
-    sid = "Allow use of the key",
-    actions = [
-      "kms:Encrypt",
-      "kms:Decrypt",
-      "kms:ReEncrypt*",
-      "kms:GenerateDataKey*",
-      "kms:DescribeKey"
-    ]
-    principals {
-      type = "AWS"
-      identifiers = ["${aws_iam_role.lambda_rotation.arn}"]
-      #identifiers = ["${concat(list("arn:aws:iam::563249796440:role/testsecret-automatic-password-manager-rotation_lambda"),var.additional_kms_role_arn)}"]
-    }
-    resources = ["*"]
-  }
-
-  statement {
-    sid = "Allow attachment of persistent resources",
-    actions = [
-      "kms:CreateGrant",
-      "kms:ListGrants",
-      "kms:RevokeGrant"
-    ]
-    principals {
-      type = "AWS"
-      identifiers = ["${aws_iam_role.lambda_rotation.arn}"]
-    }
-    resources = ["*"]
-    condition {
-        test     = "Bool"
-        variable = "kms:GrantIsForAWSResource"
-        values = [ "true"]
-    }
-  }
-}
-*/
-
-resource "aws_kms_key" "secret" {
-  description         = "Key for secret ${var.name}"
+resource "aws_kms_key" "default" {
+  description         = "Key for Secrets Manager secret [${module.this.id}]"
   enable_key_rotation = true
-  #policy              = "${data.aws_iam_policy_document.kms.json}"
-  policy = <<POLICY
-{
-  "Id": "key-consolepolicy-3",
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "Enable IAM User Permissions",
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": [
-          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        ]
-      },
-      "Action": "kms:*",
-      "Resource": "*"
-    },
-    {
-      "Sid": "Allow use of the key",
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": [
-          "${aws_iam_role.lambda_rotation.arn}"
-        ]
-      },
-      "Action": [
-        "kms:Encrypt",
-        "kms:Decrypt",
-        "kms:ReEncrypt*",
-        "kms:GenerateDataKey*",
-        "kms:DescribeKey"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "Allow attachment of persistent resources",
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": [
-          "${aws_iam_role.lambda_rotation.arn}"
-        ]
-      },
-      "Action": [
-        "kms:CreateGrant",
-        "kms:ListGrants",
-        "kms:RevokeGrant"
-      ],
-      "Resource": "*",
-      "Condition": {
-        "Bool": {
-          "kms:GrantIsForAWSResource": "true"
-        }
-      }
-    }
-  ]
-}
-POLICY
+  policy              = data.aws_iam_policy_document.kms.json
+  tags                = module.this.tags
 }
 
-
-
-resource "aws_kms_alias" "secret" {
-  name          = "alias/${var.name}"
-  target_key_id = "${aws_kms_key.secret.key_id}"
+resource "aws_kms_alias" "default" {
+  name          = "alias/${module.this.id}"
+  target_key_id = aws_kms_key.default.key_id
 }
 
+resource "aws_secretsmanager_secret" "default" {
+  name        = module.slash.id
+  description = "Username and password for RDS user [${var.mysql_username}]."
+  kms_key_id  = aws_kms_key.default.key_id
+  tags        = module.this.tags
+  #policy      = # TODO
+}
 
-
-resource "aws_secretsmanager_secret" "secret" {
-  description         = "${var.secret_description}"
-  kms_key_id          = "${aws_kms_key.secret.key_id}"
-  name                = "${var.name}"
-  rotation_lambda_arn = "${aws_lambda_function.rotate-code-mysql.arn}"
+resource "aws_secretsmanager_secret_rotation" "default" {
+  secret_id           = aws_secretsmanager_secret.default.id
+  rotation_lambda_arn = aws_lambda_function.default.arn
   rotation_rules {
-    automatically_after_days = "${var.rotation_days}"
+    automatically_after_days = var.rotation_days
   }
-  #tags                = "${var.tags}"
-  #policy =
 }
 
-resource "aws_secretsmanager_secret_version" "secret" {
+resource "aws_secretsmanager_secret_version" "default" {
+  secret_id     = aws_secretsmanager_secret.default.id
+  secret_string = jsonencode(var.rotation_type == "single" ? local.secret_string_single : local.secret_string_multi)
+
+  # Changes to the password in Terraform should not trigger a change in state
+  # to Secrets Manager as this could cause a loss of access to the target RDS
+  # instance.
+  # In other words, once Secrets Manager has managed to rotate the password,
+  # Terraform should no longer attempt to apply a new password.
   lifecycle {
     ignore_changes = [
-      "secret_string"
+      secret_string
     ]
   }
-  secret_id     = "${aws_secretsmanager_secret.secret.id}"
-  secret_string = <<EOF
-{
-  "username": "${var.mysql_username}",
-  "engine": "mysql",
-  "dbname": "${var.mysql_dbname}",
-  "host": "${var.mysql_host}",
-  "password": "${var.mysql_password}",
-  "port": ${var.mysql_port},
-  "dbInstanceIdentifier": "${var.mysql_dbInstanceIdentifier}"
 }
-EOF
+
+module "slash" {
+  source = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.19.2"
+
+  enabled             = var.enabled
+  namespace           = var.namespace
+  environment         = "rds"
+  stage               = var.stage
+  name                = var.name
+  delimiter           = "/"
+  attributes          = var.attributes
+  tags                = var.tags
+  additional_tag_map  = var.additional_tag_map
+  label_order         = ["stage", "name", "environment", "namespace", "attributes"]
+  regex_replace_chars = var.regex_replace_chars
+  id_length_limit     = var.id_length_limit
+
+  context = var.context
 }
+
