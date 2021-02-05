@@ -173,7 +173,9 @@ resource "aws_secretsmanager_secret_version" "default" {
 }
 
 module "slash" {
-  source    = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.19.2"
+  source  = "cloudposse/label/null"
+  version = "0.22.1"
+
   delimiter = "/"
   context   = module.this.context
 }
