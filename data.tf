@@ -1,7 +1,7 @@
 data "aws_partition" "current" {}
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
-data "aws_subnet" "firstsub" { id = "${var.subnets_lambda[0]}" }
+data "aws_subnet" "firstsub" { id = var.subnets_lambda[0] }
 
 data "aws_iam_policy_document" "service" {
   statement {
