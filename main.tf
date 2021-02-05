@@ -176,7 +176,8 @@ module "slash" {
   source  = "cloudposse/label/null"
   version = "0.22.1"
 
-  delimiter = "/"
-  context   = module.this.context
+  delimiter   = "/"
+  context     = module.this.context
+  label_order = var.secret_label_order
 }
 
