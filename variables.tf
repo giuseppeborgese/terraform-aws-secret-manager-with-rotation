@@ -58,3 +58,13 @@ variable "security_group" {
   description = "The security group(s) where the Lambda Function will be run. This must have access to the RDS instance. The best option is to make this the RDS' security group and allow the SG to access itself"
 }
 
+variable "secret_label_order" {
+  type        = list
+  default     = ["namespace", "environment", "stage", "name", "attributes"]
+  description = <<-EOT
+    The naming order of the id output and Name tag.
+    Defaults to ["namespace", "environment", "stage", "name", "attributes"].
+    You can omit any of the 5 elements, but at least one must be present.
+  EOT
+}
+
