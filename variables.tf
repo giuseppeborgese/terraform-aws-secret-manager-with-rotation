@@ -58,6 +58,11 @@ variable "security_group" {
   description = "The security group(s) where the Lambda Function will be run. This must have access to the RDS instance. The best option is to make this the RDS' security group and allow the SG to access itself"
 }
 
+variable "mysql_replicahost" {
+  type    = string
+  default = ""
+}
+
 variable "secret_label_order" {
   type        = list
   default     = ["namespace", "environment", "stage", "name", "attributes"]
