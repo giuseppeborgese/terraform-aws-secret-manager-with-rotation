@@ -196,7 +196,7 @@ resource "aws_secretsmanager_secret_version" "default" {
 
 module "slash" {
   source  = "cloudposse/label/null"
-  version = "0.22.1"
+  version = "0.24.1"
 
   delimiter   = "/"
   context     = module.this.context
