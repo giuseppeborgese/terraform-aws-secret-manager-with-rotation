@@ -11,7 +11,7 @@ variable "rotation_days" {
 }
 
 variable "subnets_lambda" {
-  type        = list
+  type        = list(any)
   description = "The subnets where the Lambda Function will be run"
 }
 
@@ -54,7 +54,7 @@ variable "secretsmanager_masterarn" {
 #}
 
 variable "security_group" {
-  type        = list
+  type        = list(any)
   description = "The security group(s) where the Lambda Function will be run. This must have access to the RDS instance. The best option is to make this the RDS' security group and allow the SG to access itself"
 }
 
@@ -65,7 +65,7 @@ variable "mysql_replicahost" {
 }
 
 variable "secret_label_order" {
-  type        = list
+  type        = list(any)
   default     = ["namespace", "environment", "stage", "name", "attributes"]
   description = <<-EOT
     The naming order of the id output and Name tag.
