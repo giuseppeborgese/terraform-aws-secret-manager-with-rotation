@@ -59,8 +59,9 @@ variable "security_group" {
 }
 
 variable "mysql_replicahost" {
-  type    = string
-  default = ""
+  type        = string
+  description = "The RDS replica endpoint to connect to your read-only database"
+  default     = null
 }
 
 variable "secret_label_order" {
