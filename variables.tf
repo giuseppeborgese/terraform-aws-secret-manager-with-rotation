@@ -2,6 +2,11 @@ variable "rotation_type" {
   type        = string
   description = "Is this `single` or `multi` user rotation?"
   default     = "single"
+
+  validation {
+    condition     = var.rotation_type == "single" || var.rotation_type == "multi"
+    error_message = "The rotation_type value must be either `single` or `multi`."
+  }
 }
 
 variable "rotation_days" {
