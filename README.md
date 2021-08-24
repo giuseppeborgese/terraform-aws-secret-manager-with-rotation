@@ -12,16 +12,15 @@ This module will create all the resources to store and rotate a MySQL or Aurora 
 # Usage Example
 ``` hcl
 module "secret-manager-with-rotation" {
-  source                     = "giuseppeborgese/secret-manager-with-rotation/aws"
-  version                    = "<always choose the latest version displayed in the upper right corner of this page>"
-  name                       = "PassRotation"
-  rotation_days              = 10
-  subnets_lambda             = ["subnet-xxxxxx", "subnet-xxxxxx"]
-  mysql_username             = "giuseppe"
-  mysql_dbname               = "my_db_name"
-  mysql_host                 =  "mysqlEndpointurl.xxxxxx.us-east-1.rds.amazonaws.com"
-  mysql_password             = "dummy_password_will_we_rotated"
-  mysql_dbInstanceIdentifier = "my_rds_db_identifier"
+  source         = "giuseppeborgese/secret-manager-with-rotation/aws"
+  version        = "<always choose the latest version displayed in the upper right corner of this page>"
+  name           = "PassRotation"
+  rotation_days  = 10
+  subnets_lambda = ["subnet-xxxxxx", "subnet-xxxxxx"]
+  mysql_username = "giuseppe"
+  mysql_dbname   = "my_db_name"
+  mysql_host     =  "mysqlEndpointurl.xxxxxx.us-east-1.rds.amazonaws.com"
+  mysql_password = "dummy_password_will_we_rotated"
 }
 ```
 
