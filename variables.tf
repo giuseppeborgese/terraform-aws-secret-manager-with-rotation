@@ -19,6 +19,10 @@ variable "subnets_lambda" {
   type        = list(any)
   description = "The subnets where the Lambda Function will be run"
 }
+variable "destination_region" {
+  type        = string
+  description = "The Destionation Region for Secret Manager"
+}
 
 variable "mysql_username" {
   type        = string
