@@ -168,8 +168,13 @@ resource "aws_secretsmanager_secret" "default" {
   kms_key_id  = aws_kms_key.default.key_id
   tags        = module.this.tags
   #policy      = # TODO
-  replica {
-    region = var.destination_region
+
+  dynamic "replica" {
+    for_each = var.replica_regions
+    content {
+      kms_key_id = replica.value.kms_key_id
+      region     = replica.value.region
+    }
   }
 }
 

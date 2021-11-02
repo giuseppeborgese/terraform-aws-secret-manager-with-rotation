@@ -19,9 +19,14 @@ variable "subnets_lambda" {
   type        = list(any)
   description = "The subnets where the Lambda Function will be run"
 }
-variable "destination_region" {
-  type        = string
-  description = "The Destionation Region for Secret Manager"
+
+variable "replica_regions" {
+  type = list(object({
+    kms_key_id = string
+    region     = string
+  }))
+  description = "A list of objects containing the regions to which to replicate the secret. Each element in the list must be an object with `kms_key_id` and `region` keys. `kms_key_id` may be set to `null` to use the default AWS-managed KMS key."
+  default     = []
 }
 
 variable "mysql_username" {
