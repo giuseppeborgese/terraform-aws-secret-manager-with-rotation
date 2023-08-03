@@ -168,6 +168,14 @@ resource "aws_secretsmanager_secret" "default" {
   kms_key_id  = aws_kms_key.default.key_id
   tags        = module.this.tags
   #policy      = # TODO
+
+  dynamic "replica" {
+    for_each = var.replica_regions
+    content {
+      kms_key_id = replica.value.kms_key_id
+      region     = replica.value.region
+    }
+  }
 }
 
 resource "aws_secretsmanager_secret_rotation" "default" {
@@ -196,7 +204,7 @@ resource "aws_secretsmanager_secret_version" "default" {
 
 module "slash" {
   source  = "cloudposse/label/null"
-  version = "0.22.1"
+  version = "0.24.1"
 
   delimiter   = "/"
   context     = module.this.context

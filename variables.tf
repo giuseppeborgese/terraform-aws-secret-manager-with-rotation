@@ -2,6 +2,11 @@ variable "rotation_type" {
   type        = string
   description = "Is this `single` or `multi` user rotation?"
   default     = "single"
+
+  validation {
+    condition     = var.rotation_type == "single" || var.rotation_type == "multi"
+    error_message = "The rotation_type value must be either `single` or `multi`."
+  }
 }
 
 variable "rotation_days" {
@@ -13,6 +18,15 @@ variable "rotation_days" {
 variable "subnets_lambda" {
   type        = list(any)
   description = "The subnets where the Lambda Function will be run"
+}
+
+variable "replica_regions" {
+  type = list(object({
+    kms_key_id = string
+    region     = string
+  }))
+  description = "A list of objects containing the regions to which to replicate the secret. Each element in the list must be an object with `kms_key_id` and `region` keys. `kms_key_id` may be set to `null` to use the default AWS-managed KMS key."
+  default     = []
 }
 
 variable "mysql_username" {
